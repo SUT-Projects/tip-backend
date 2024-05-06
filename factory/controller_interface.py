@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from flask.views import MethodView
 
 
-class ControllerInterface(ABC, MethodView):
+class ControllerInterface(ABC):
     """
     This abstract class defines the interface for a data controller.
 

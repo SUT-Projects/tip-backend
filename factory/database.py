@@ -7,6 +7,9 @@ class Database:
         self.client = MongoClient(config.MONGODB_URI)
         self.db_instance = self.client[database_name]
 
+    def get_collection(self, collection_name):
+        return self.db_instance.get_collection(collection_name)
+
     def find_all(self, collection_name):
         """
         Finds all elements from a specified collection.
