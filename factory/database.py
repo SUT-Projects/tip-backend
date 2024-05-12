@@ -1,5 +1,7 @@
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 import config
+from bson.objectid import ObjectId
 
 
 class Database:
@@ -44,38 +46,75 @@ class Database:
         pass
 
     def create_one(self, collection_name, element):
+        """Inserts a single document into the specified collection and returns the inserted document.
+
+            Args:
+                collection_name (str): The name of the collection to insert into.
+                element (dict): The document to insert.
+
+            Returns:
+                dict or str: The inserted document on success, or an error message on failure.
+
+            Raises:
+                PyMongoError: If a MongoDB-specific error occurs during insertion.
         """
-        Creates a new element in a specified collection.
+        try:
+            if "_id" in element:
+                del element["_id"]
+            # Insert the element into the collection
+            inserted_result = self.db_instance.get_collection(collection_name).insert_one(element)
 
-        Args:
-            collection_name: The name of the MongoDB collection to insert into.
-            element: A dictionary representing the new element to create.
-
-        Returns:
-            The newly created element object.
-
-        Raises:
-            NotImplementedError: If the subclass does not implement this method.
-        """
-        pass
+            # Retrieve the inserted document for verification (optional)
+            return self.get_collection(collection_name).find_one({'_id': inserted_result.inserted_id})
+        except PyMongoError as pyError:
+            # Handle MongoDB-specific errors gracefully (e.g., logging, detailed error messages)
+            print(f">>> insertion_error for {collection_name}: {str(pyError)}")
+            return str(pyError)
+        except Exception as exe:
+            # Catch more general exceptions for unexpected situations
+            print(f">>> unknown error occur: ${exe}")
+            return f"Unknown Error: {str(exe)}"
 
     def update_one(self, collection_name, element_id, element):
         """
-        Updates an existing element in a specified collection by its ID.
+        Updates an existing element in a specified MongoDB collection by its ID.
 
         Args:
-            collection_name: The name of the MongoDB collection to update in.
-            element_id: The ID of the element to update.
-            element: A dictionary containing the updated data for the element.
+            collection_name (str): The name of the MongoDB collection to update in.
+            element_id (str or ObjectId): The ID of the element to update.
+            element (dict): A dictionary containing the updated data for the element.
+                It should not contain an "_id" key as this field is used internally by MongoDB.
 
         Returns:
-            The updated element object.
+            The updated element object (optional). This section is currently commented out.
+            If an error occurs, a string representing the error message is returned.
 
         Raises:
-            NotImplementedError: If the subclass does not implement this method.
+            PyMongoError: If a MongoDB-specific error occurs during the update operation.
+            Exception: If an unexpected error occurs during the update operation.
         """
 
-        pass
+        try:
+            # _id cannot be update so removing from object
+            if "_id" in element:
+                del element["_id"]
+
+            self.db_instance.get_collection(collection_name).update_one({
+                "_id": ObjectId(element_id)
+            }, {
+                "$set": element
+            })
+
+            # Retrieve the updated document for verification (optional)
+            return self.get_collection(collection_name).find_one({'_id': ObjectId(element_id)})
+        except PyMongoError as pyError:
+            # Handle MongoDB-specific errors gracefully (e.g., logging, detailed error messages)
+            print(f">>> updation_error for {collection_name}: {str(pyError)}")
+            return str(pyError)
+        except Exception as exe:
+            # Catch more general exceptions for unexpected situations
+            print(f">>> unknown error occur: ${exe}")
+            return f"Unknown Error: {str(exe)}"
 
     def delete_one(self, collection_name, element_id):
         """
@@ -91,5 +130,5 @@ class Database:
         Raises:
             NotImplementedError: If the subclass does not implement this method.
         """
-        
+
         pass

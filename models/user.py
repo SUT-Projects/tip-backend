@@ -1,44 +1,69 @@
-from factory.controller_interface import ControllerInterface
-from factory.database import Database
-from flask import request, jsonify
+from datetime import datetime
+from bson.timestamp import Timestamp
 
+class User:
+    # account status: 0 -> Pending | 1 -> Active | 2 -> Suspended | 3 -> Inactive
+    def __init__(self, name, email, password, user_type, department,
+                 _id=None,
+                 created_date=Timestamp(datetime.now(), 1),
+                 updated_date=Timestamp(datetime.now(), 1),
+                 account_status=1
+                 ):
+        self._id = _id
+        self.name = name
+        self.email = email
+        self.password = password
+        self.user_type = user_type
+        self.department = department
+        self.created_date = created_date
+        self.updated_date = updated_date
+        self.account_status = account_status
 
-class User(ControllerInterface):
-    def __init__(self) -> None:
-        super().__init__()
-        self.db = Database()
-        self.collection_name = "users"
+    def to_json(self):
+        return {
+            "_id": None if self._id is None else self._id,
+            "name": self.name,
+            "email": self.email,
+            "password": self.password,
+            "user_type": self.user_type,
+            "department": self.department,
+            "account_status": self.account_status,
+            "created_date": Timestamp(datetime.now(), 1).as_datetime() if self.created_date is None
+            else self.created_date.as_datetime(),
+            "updated_date": Timestamp(datetime.now(), 1).as_datetime() if self.updated_date is None
+            else self.updated_date.as_datetime()
+        }
 
-    def user_login(self):
-        pass
+    def to_bson(self):
+        return {
+            "_id": None if self._id is None else self._id,
+            "name": self.name,
+            "email": self.email,
+            "password": self.password,
+            "user_type": self.user_type,
+            "department": self.department,
+            "account_status": self.account_status,
+            "created_date": Timestamp(datetime.now(), 1) if self.created_date is None else self.created_date,
+            "updated_date": Timestamp(datetime.now(), 1) if self.updated_date is None else self.updated_date
+        }
 
-    def find_all(self):
-        pass
+    @staticmethod
+    def to_object(bson_document):
+        created_date = bson_document["created_date"] if bson_document["created_date"] is not str else (
+            Timestamp(datetime.strptime(bson_document["created_date"], "%a, %d %b %Y %H:%M:%S %Z"), 1))
+        updated_date = bson_document["updated_date"] if bson_document["updated_date"] is not str else (
+            Timestamp(datetime.strptime(bson_document["updated_date"], "%a, %d %b %Y %H:%M:%S %Z"), 1))
 
-    def find_by_id(self, element_id):
-        pass
-
-    def create_one(self):
-        try:
-            request_json = request.get_json()
-            fetched_document = self.db.get_collection(self.collection_name).find_one({
-                "email": request_json["email"]
-            })
-
-            if fetched_document is not None:
-                return {
-                    "message": f"user already exists with {request_json['email']}. Please use different email address",
-                    "status": 200,
-                    "error": False,
-                }
-
-            return jsonify({})
-        except Exception as ex:
-            print(ex)
-            return "error"
-
-    def update_one(self):
-        pass
-
-    def delete_one(self):
-        pass
+        return User(
+            _id=None if bson_document["_id"] is None else str(bson_document["_id"]),
+            name=bson_document["name"],
+            email=bson_document["email"],
+            password=bson_document["password"],
+            department=bson_document["department"],
+            user_type=bson_document["user_type"],
+            account_status=bson_document["account_status"],
+            created_date=Timestamp(datetime.now(), 1) if bson_document["created_date"] is None else
+            created_date,
+            updated_date=Timestamp(datetime.now(), 1) if bson_document["updated_date"] is None else
+            updated_date
+        )

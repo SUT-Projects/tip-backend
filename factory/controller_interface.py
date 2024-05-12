@@ -19,13 +19,13 @@ class ControllerInterface(ABC):
         raise NotImplementedError("find_by_id() not implemented")
 
     @abstractmethod
-    def create_one(self):
-        raise NotImplementedError("create_one() not implemented")
+    def create_ele(self):
+        raise NotImplementedError("create_ele() not implemented")
 
     @abstractmethod
-    def update_one(self):
-        raise NotImplementedError("update_one() not implemented")
+    def update_ele(self):
+        raise NotImplementedError("update_ele() not implemented")
 
     @abstractmethod
-    def delete_one(self):
-        raise NotImplementedError("delete_one() not implemented")
+    def delete_ele(self, element_id):
+        raise NotImplementedError("delete_ele() not implemented")
