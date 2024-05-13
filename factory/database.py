@@ -12,6 +12,15 @@ class Database:
     def get_collection(self, collection_name):
         return self.db_instance.get_collection(collection_name)
 
+    def check_id_existence(self, collection_name, element_id):
+        if not ObjectId.is_valid(element_id):
+            raise ValueError("Invalid Id")
+
+        fetched_document_count = self.db_instance.get_collection(collection_name).count_documents({
+            "_id": ObjectId(element_id)
+        })
+        return fetched_document_count > 0
+
     def find_all(self, collection_name):
         """
         Finds all elements from a specified collection.
