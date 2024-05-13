@@ -5,8 +5,10 @@ from controller.user_controller import UserController
 from controller.quiz_controller import QuizController
 from controller.forum_controller import ForumController
 from controller.discussion_controller import DiscussionController
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route("/", methods=['GET'])
