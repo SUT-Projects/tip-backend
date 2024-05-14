@@ -96,7 +96,8 @@ class Quiz:
                 question=ques_doc["question"],
                 options=[str(op) for op in list(ques_doc["options"])],
                 correct_option=ques_doc["correct_option"],
-                points=ques_doc["points"]
+                points=ques_doc["points"],
+                question_id=ques_doc["question_id"]
             ) for ques_doc in list(bson_document["questions_list"])],
             created_by_user_id=bson_document["created_by_user_id"],
             created_by_user_name=bson_document["created_by_user_name"],
